@@ -46,7 +46,7 @@ class UpdateManager(private val activity: Activity) {
         val obj = JSONObject(resp)
 
         val tag = obj.optString("tag_name", "0")
-        val versiString = tag.replace(Regex("[^0-9]"), "")
+        val versiString = tag.replace(Regex("[^0-9.]"), "").split(".").firstOrNull() ?: "0"
         val versi = versiString.toIntOrNull() ?: 0
         val assets = obj.getJSONArray("assets")
         var apkUrl = ""

@@ -11,8 +11,8 @@ android {
         applicationId = "id.cctv.rebag"
         minSdk = 24
         targetSdk = 34
-        versionCode = 4
-        versionName = "4.0"
+        versionCode = 5
+        versionName = "5.0"
         // Mendukung vector drawable untuk launcher icon
         vectorDrawables.useSupportLibrary = true
     }
