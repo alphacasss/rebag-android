@@ -14,7 +14,7 @@ gradlew assembleDebug
 APK hasil build: `app/build/outputs/apk/debug/RebagHarian-v<versi>.apk`
 (nama mengikuti aplikasi dan versi, diatur di `app/build.gradle.kts`).
 
-Contoh versi 2.0: `RebagHarian-v2.0.apk`.
+Contoh versi 2.0: `RebagHarian-v3.0.apk`.
 
 ## Rilis & OTA
 
