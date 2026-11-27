@@ -11,7 +11,10 @@ set JAVA_HOME=C:\Program Files\Microsoft\jdk-17.0.21.21-hotspot
 gradlew assembleDebug
 ```
 
-APK: `app/build/outputs/apk/debug/app-debug.apk`
+APK hasil build: `app/build/outputs/apk/debug/RebagHarian-v<versi>.apk`
+(nama mengikuti aplikasi dan versi, diatur di `app/build.gradle.kts`).
+
+Contoh versi 2.0: `RebagHarian-v2.0.apk`.
 
 ## Rilis & OTA
 

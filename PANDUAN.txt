@@ -2,7 +2,9 @@ APLIKASI REBAG HARIAN - ANDROID (Kotlin)
 
 Project: C:\Users\zoldy\Documents\rebag-android
 Package: id.cctv.rebag
-APK debug: app\build\outputs\apk\debug\app-debug.apk
+APK debug: `app\build\outputs\apk\debug\RebagHarian-v2.0.apk`
+(nama file mengikuti nama aplikasi dan versi; untuk rilis berikutnya otomatis
+jadi `RebagHarian-v<versi>.apk` setelah `versionName` diubah).
 
 CARA BUILD:
   cd C:\Users\zoldy\Documents\rebag-android

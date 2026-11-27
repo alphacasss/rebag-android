@@ -23,6 +23,14 @@ android {
     kotlinOptions {
         jvmTarget = "17"
     }
+
+    applicationVariants.all {
+        val versi = versionName ?: "1.0"
+        outputs.all {
+            (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl)
+                .outputFileName = "RebagHarian-v$versi.apk"
+        }
+    }
 }
 
 dependencies {
