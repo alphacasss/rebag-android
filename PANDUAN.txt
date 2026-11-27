@@ -1,0 +1,50 @@
+APLIKASI REBAG HARIAN - ANDROID (Kotlin)
+
+Project: C:\Users\zoldy\Documents\rebag-android
+Package: id.cctv.rebag
+APK debug: app\build\outputs\apk\debug\app-debug.apk
+
+CARA BUILD:
+  cd C:\Users\zoldy\Documents\rebag-android
+  set JAVA_HOME=C:\Program Files\Microsoft\jdk-17.0.21.21-hotspot
+  gradlew assembleDebug
+
+CARA PASANG:
+  adb install app\build\outputs\apk\debug\app-debug.apk
+  (atau salin APK ke HP lalu buka; aktifkan "Install unknown apps")
+
+CARA PAKAI:
+1. Buka aplikasi, tekan tombol "Pengaturan", masukkan URL Web App Apps Script
+   yang SAMA dengan aplikasi Windows, lalu tekan "Simpan".
+   Format: https://script.google.com/macros/s/.../exec
+2. Kembali ke halaman utama. Isi Jumlah Koli per Hari, pilih Lokasi Tumpukan,
+   lalu tekan "Simpan & Kirim". Total Hasil Rebag dan Kuantum terhitung otomatis.
+3. Tombol "Tarik Data" mengambil data yang diinput dari komputer.
+4. Tombol "Tarik Data" di komputer mengambil data yang diinput dari HP.
+
+UPDATE OTOMATIS (OTA):
+
+Aplikasi mengecek update otomatis saat dibuka (bisa dimatikan di Pengaturan),
+atau lewat tombol "Cek Update" di halaman Pengaturan.
+
+Cara mengaktifkan:
+1. Upload APK ke hosting dengan URL langsung (Google Drive share link yang
+   diubah ke direct download, Dropbox, GitHub release, dll).
+2. Di Apps Script, isi:
+     var APK_URL = 'URL_APK_LANGSUNG';
+     var APP_VERSION = 3;      // lebih besar dari versi terpasang (2)
+     var CATATAN_UPDATE = 'Catatan versi baru';
+3. Deploy ulang Web App (New version).
+4. Di aplikasi, buka Pengaturan → tekan "Cek Update". Akan muncul dialog
+   unduh & pasang. Izinkan "Install unknown apps" jika diminta.
+
+Kolom "URL Update" di Pengaturan bisa diisi manual kalau manifest update
+tidak memakai Web App yang sama. Kosongkan untuk memakai URL Web App + ?update=1.
+
+Versi sekarang: 2.0 (versionCode 2).
+
+SINKRON:
+Windows dan Android memakai sheet + Web App yang sama. File Apps Script
+yang dipakai: C:\Users\zoldy\Documents\rebag-simple\google\TanpaToken.gs
+(sudah mendukung aksi tambah, hapus, dan baca). Deploy ulang Apps Script
+setelah mengganti file tersebut.
