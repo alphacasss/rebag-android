@@ -42,6 +42,7 @@ class MainActivity : Activity() {
     private lateinit var totalEdit: EditText
     private lateinit var koliEdit: EditText
     private lateinit var kuantumText: TextView
+    private lateinit var kuantumTotalText: TextView
     private lateinit var lokasiSpinner: Spinner
     private lateinit var daftarLayout: LinearLayout
 
@@ -176,7 +177,9 @@ class MainActivity : Activity() {
             override fun onTextChanged(s: CharSequence?, a: Int, b: Int, c: Int) {}
         })
 
-        kuantumText = Ui.hint(this, "Kuantum: 0 kg")
+        kuantumTotalText = Ui.hint(this, "Kuantum total rebag: 0 kg")
+        form.addView(kuantumTotalText)
+        kuantumText = Ui.hint(this, "Kuantum koli hari ini: 0 kg")
         form.addView(kuantumText)
 
         form.addView(Ui.label(this, "LOKASI TUMPUKAN"))
@@ -192,6 +195,16 @@ class MainActivity : Activity() {
             Ui.button(this, "Tarik Data", false) { tarik() }
         ))
         root.addView(form)
+
+        // Clear data (hanya data lokal + sheet)
+        val clearData = Ui.card(this)
+        clearData.addView(Ui.title(this, "HAPUS DATA"))
+        clearData.addView(Ui.label(this, "Hapus semua baris yang sudah direkam di sheet dan penyimpanan lokal. Aksi ini tidak terbalik."))
+        clearData.addView(Ui.row(this,
+            Ui.button(this, "Hapus Semua", true) { hapusSemua() },
+            Ui.button(this, "Batal", false) {}
+        ))
+        root.addView(clearData)
 
         // Daftar data
         val daftar = Ui.card(this)
@@ -253,13 +266,15 @@ class MainActivity : Activity() {
     private fun totalSebelumnya(): Double {
         if (rows.length() == 0) return 0.0
         val terakhir = rows.optJSONArray(rows.length() - 1) ?: return 0.0
-        return angka(terakhir.optString(1))
+        return angka(terakhir.optString(2))
     }
 
     private fun hitung() {
         val koli = angka(koliEdit.text.toString())
-        totalEdit.setText(rapih(totalSebelumnya() + koli))
-        kuantumText.text = "Kuantum: ${rapih(koli * 10)} kg"
+        val total = totalSebelumnya() + koli
+        totalEdit.setText(rapih(total))
+        kuantumTotalText.text = "Kuantum total rebag: ${rapih(total * 10)} kg"
+        kuantumText.text = "Kuantum koli hari ini: ${rapih(koli * 10)} kg"
     }
 
     private fun simpan() {
@@ -269,9 +284,12 @@ class MainActivity : Activity() {
             return
         }
         val koli = angka(teks)
+        val total = angka(totalEdit.text.toString())
         val baris = JSONArray()
+            .put((rows.length() + 1).toString())
             .put(tanggal)
-            .put(rapih(angka(totalEdit.text.toString())))
+            .put(rapih(total))
+            .put(rapih(total * 10))
             .put(rapih(koli))
             .put(rapih(koli * 10))
             .put(lokasiSpinner.selectedItem.toString())
@@ -298,9 +316,8 @@ class MainActivity : Activity() {
             var baru = 0
             for (i in 0 until data.length()) {
                 val b = data.optJSONArray(i) ?: continue
-                val awal = b.optString(0).trim().uppercase()
-                if (awal.startsWith("RINGKASAN") || awal.startsWith("JUMLAH BARIS") ||
-                    awal.startsWith("TOTAL ")
+                if (b.length() < 7 || angka(b.optString(0)) == 0.0 ||
+                    b.optString(6).trim().isEmpty()
                 ) continue
                 if (jumlahSama(rows, b) <= jumlahSamaSebelum(data, i, b)) {
                     rows.put(b)
@@ -333,12 +350,15 @@ class MainActivity : Activity() {
     }
 
     private fun sama(a: JSONArray, b: JSONArray): Boolean {
-        if (a.length() < 5 || b.length() < 5) return false
-        return a.optString(0).trim() == b.optString(0).trim() &&
-            angka(a.optString(1)) == angka(b.optString(1)) &&
-            angka(a.optString(2)) == angka(b.optString(2)) &&
-            angka(a.optString(3)) == angka(b.optString(3)) &&
-            a.optString(4).trim() == b.optString(4).trim()
+        if (a.length() < 7 || b.length() < 7) return false
+        for (i in 0 until 7) {
+            val sama = if (i == 1 || i == 6)
+                a.optString(i).trim() == b.optString(i).trim()
+            else
+                angka(a.optString(i)) == angka(b.optString(i))
+            if (!sama) return false
+        }
+        return true
     }
 
     private fun refresh() {
@@ -348,11 +368,10 @@ class MainActivity : Activity() {
         var kuantum = 0.0
         for (i in 0 until rows.length()) {
             val b = rows.optJSONArray(i) ?: continue
-            hasil += angka(b.optString(1))
-            koli += angka(b.optString(2))
-            kuantum += angka(b.optString(3))
+            koli += angka(b.optString(4))
+            kuantum += angka(b.optString(5))
             val tv = TextView(this).apply {
-                text = "${i + 1}. ${b.optString(0)} | ${b.optString(4)}"
+                text = "${b.optString(0)}. ${b.optString(1)} | ${b.optString(6)}"
                 textSize = 12f
                 setTextColor(Ui.TEXT)
                 setPadding(dp(context, 8f), dp(context, 8f), dp(context, 8f), dp(context, 8f))
@@ -364,10 +383,10 @@ class MainActivity : Activity() {
             }
             daftarLayout.addView(tv)
         }
-        val terakhir = if (rows.length() > 0)
-            angka(rows.optJSONArray(rows.length() - 1)?.optString(1)) else 0.0
-        statTotal.text = rapih(terakhir)
-        statKuantum.text = rapih(terakhir * 10)
+        hasil = if (rows.length() > 0)
+            angka(rows.optJSONArray(rows.length() - 1)?.optString(2)) else 0.0
+        statTotal.text = rapih(hasil)
+        statKuantum.text = rapih(hasil * 10)
         statKoli.text = rapih(koli)
         if (daftarLayout.childCount == 0) {
             daftarLayout.addView(Ui.hint(this, "Belum ada data."))
@@ -424,5 +443,29 @@ class MainActivity : Activity() {
                 runOnUiThread { statusText.text = "Error: ${e.message}" }
             }
         }.start()
+    }
+
+    private fun hapusSemua() {
+        AlertDialog.Builder(this)
+            .setTitle("Hapus Semua Data")
+            .setMessage("Yakin ingin menghapus semua baris data yang tersimpan di Google Sheet dan penyimpanan lokal?\n\nIni bukan tindakan yang dapat dibatalkan.")
+            .setPositiveButton("Hapus Semua") { _, _ ->
+                // Hapus dari sheet
+                post("clear", JSONArray()) { resp ->
+                    if (resp.optBoolean("ok")) {
+                        rows = JSONArray()
+                        prefs.edit().remove("rows").apply()
+                        refresh()
+                        hitung()
+                        statusText.text = "Semua data telah dihapus."
+                        Toast.makeText(this, "Data telah dihapus.", Toast.LENGTH_SHORT).show()
+                    } else {
+                        statusText.text = "Gagal: ${resp.optString("error")}"
+                        Toast.makeText(this, "Gagal menghapus data.", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+            .setNegativeButton("Batal", null)
+            .show()
     }
 }

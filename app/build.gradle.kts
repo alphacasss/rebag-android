@@ -13,6 +13,8 @@ android {
         targetSdk = 34
         versionCode = 3
         versionName = "3.0"
+        // Mendukung vector drawable untuk launcher icon
+        vectorDrawables.useSupportLibrary = true
     }
 
     compileOptions {
@@ -22,6 +24,13 @@ android {
 
     kotlinOptions {
         jvmTarget = "17"
+    }
+
+    packaging {
+        // Universal APK: semua ABI (auto-inclued by default)
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
     }
 
     applicationVariants.all {
