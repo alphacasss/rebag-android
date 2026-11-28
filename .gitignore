@@ -9,3 +9,5 @@ captures/
 *.apk
 *.log
 .gh_token
+.kotlin/
+.gh_token
