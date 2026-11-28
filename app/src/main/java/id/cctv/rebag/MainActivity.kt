@@ -450,20 +450,20 @@ class MainActivity : Activity() {
             .setTitle("Hapus Semua Data")
             .setMessage("Yakin ingin menghapus semua baris data yang tersimpan di Google Sheet dan penyimpanan lokal?\n\nIni bukan tindakan yang dapat dibatalkan.")
             .setPositiveButton("Hapus Semua") { _, _ ->
-                // Hapus dari sheet
-                post("clear", JSONArray()) { resp ->
-                    if (resp.optBoolean("ok")) {
-                        rows = JSONArray()
-                        prefs.edit().remove("rows").apply()
-                        refresh()
-                        hitung()
-                        statusText.text = "Semua data telah dihapus."
-                        Toast.makeText(this, "Data telah dihapus.", Toast.LENGTH_SHORT).show()
-                    } else {
-                        statusText.text = "Gagal: ${resp.optString("error")}"
-                        Toast.makeText(this, "Gagal menghapus data.", Toast.LENGTH_SHORT).show()
-                    }
+                // Salin baris untuk dikirim ke sheet sebelum lokal dihapus
+                val semua = JSONArray(rows.toString())
+                rows = JSONArray()
+                prefs.edit().putString("rows", rows.toString()).apply()
+                refresh()
+                hitung()
+                statusText.text = "Data lokal dihapus. Menghapus dari sheet..."
+                // Aksi "hapus" didukung semua versi script; kirim semua baris
+                post("hapus", semua) { resp ->
+                    statusText.text = if (resp.optBoolean("ok"))
+                        "Data dihapus (${resp.optInt("count")} baris dari sheet)."
+                    else "Data lokal dihapus. Sheet gagal: ${resp.optString("error")}"
                 }
+                Toast.makeText(this, "Data dihapus.", Toast.LENGTH_SHORT).show()
             }
             .setNegativeButton("Batal", null)
             .show()
