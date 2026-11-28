@@ -40,7 +40,8 @@ class SettingsActivity : Activity() {
 
         urlEdit = EditText(this).apply {
             hint = "https://script.google.com/macros/s/.../exec"
-            setText(prefs.getString("url", "") ?: "")
+            setText(prefs.getString("url", "")?.takeIf { it.isNotBlank() }
+                ?: "https://script.google.com/macros/s/AKfycbxjOFDff84XTZWwwjoLyYuA-2aqQruuxdf8AdlVd4OhMgCYRlIrBGKsvzigCQ2k44lk/exec")
             setSingleLine(true)
             textSize = 14f
         }

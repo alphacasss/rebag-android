@@ -417,6 +417,7 @@ class MainActivity : Activity() {
 
     private fun post(action: String, data: JSONArray, cb: (JSONObject) -> Unit) {
         val url = prefs.getString("url", "")?.trim().orEmpty()
+            .ifBlank { "https://script.google.com/macros/s/AKfycbxjOFDff84XTZWwwjoLyYuA-2aqQruuxdf8AdlVd4OhMgCYRlIrBGKsvzigCQ2k44lk/exec" }
         if (!url.startsWith("https://")) {
             statusText.text = "Buka Pengaturan dan isi URL Web App dulu."
             Toast.makeText(this, "URL Web App belum diisi.", Toast.LENGTH_SHORT).show()
