@@ -77,7 +77,10 @@ class MainActivity : Activity() {
         val header = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = android.view.Gravity.CENTER_VERTICAL
-            background = Ui.rounded(Ui.PRIMARY, 14f)
+            background = android.graphics.drawable.GradientDrawable(
+                android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
+                intArrayOf(Ui.PRIMARY, Ui.ACCENT)
+            ).apply { cornerRadius = dp(this@MainActivity, 14f).toFloat() }
             setPadding(dp(this@MainActivity, 16f), dp(this@MainActivity, 14f),
                 dp(this@MainActivity, 12f), dp(this@MainActivity, 14f))
         }
@@ -95,7 +98,7 @@ class MainActivity : Activity() {
         judul.addView(TextView(this).apply {
             text = "Input harian • sinkron ke Google Sheet"
             textSize = 10f
-            setTextColor(0xFFC8D6EA.toInt())
+            setTextColor(0xFFD1FAE5.toInt())
         })
         header.addView(judul)
         header.addView(Button(this).apply {
@@ -103,7 +106,7 @@ class MainActivity : Activity() {
             isAllCaps = false
             textSize = 11f
             setTextColor(Color.WHITE)
-            background = Ui.rounded(0x33FFFFFF, 8f, 0x66FFFFFF)
+            background = Ui.pressable(0x33FFFFFF.toInt(), 8f, 0x88FFFFFF.toInt())
             minimumHeight = dp(this@MainActivity, 40f)
             setOnClickListener {
                 startActivity(Intent(this@MainActivity, SettingsActivity::class.java))
@@ -114,14 +117,17 @@ class MainActivity : Activity() {
         ).apply { bottomMargin = dp(this@MainActivity, 12f) })
 
         // Status
+        val statusCard = Ui.card(this).apply {
+            background = Ui.rounded(Ui.ACCENT_LIGHT, 12f, Ui.ACCENT)
+        }
         statusText = TextView(this).apply {
             text = "Siap."
             textSize = 12f
-            setTextColor(Ui.PRIMARY)
+            setTextColor(Ui.ACCENT_DARK)
+            setTypeface(null, android.graphics.Typeface.BOLD)
         }
-        root.addView(Ui.card(this).apply {
-            addView(statusText)
-        })
+        statusCard.addView(statusText)
+        root.addView(statusCard)
 
         // Ringkasan atas
         val ringkas = Ui.card(this)
@@ -143,31 +149,30 @@ class MainActivity : Activity() {
         val form = Ui.card(this)
         form.addView(Ui.title(this, "INPUT HARIAN"))
 
-        form.addView(Ui.label(this, "TANGGAL"))
+        form.addView(Ui.section(this, "TANGGAL"))
         tanggalButton = Button(this).apply {
             text = tanggal
             isAllCaps = false
             textSize = 14f
             setTextColor(Ui.PRIMARY)
-            background = Ui.rounded(0xFFEEF3FA.toInt(), 8f, Ui.LINE)
+            background = Ui.pressable(Ui.ACCENT_LIGHT, 10f, Ui.ACCENT)
             minimumHeight = dp(this@MainActivity, 46f)
             setOnClickListener { pilihTanggal() }
         }
         form.addView(tanggalButton)
 
-        form.addView(Ui.label(this, "TOTAL HASIL REBAG (akumulasi)"))
-        totalEdit = EditText(this).apply {
+        form.addView(Ui.section(this, "TOTAL HASIL REBAG (akumulasi)"))
+        totalEdit = Ui.input(this).apply {
             inputType = InputType.TYPE_CLASS_NUMBER
             isEnabled = false
-            textSize = 15f
             setTextColor(Ui.PRIMARY)
+            background = Ui.rounded(Ui.ACCENT_LIGHT, 10f, Ui.ACCENT)
         }
         form.addView(totalEdit)
 
-        form.addView(Ui.label(this, "JUMLAH KOLI PER HARI"))
-        koliEdit = EditText(this).apply {
+        form.addView(Ui.section(this, "JUMLAH KOLI PER HARI"))
+        koliEdit = Ui.input(this).apply {
             inputType = InputType.TYPE_CLASS_NUMBER
-            textSize = 15f
             hint = "0"
         }
         form.addView(koliEdit)
@@ -182,7 +187,7 @@ class MainActivity : Activity() {
         kuantumText = Ui.hint(this, "Kuantum koli hari ini: 0 kg")
         form.addView(kuantumText)
 
-        form.addView(Ui.label(this, "LOKASI TUMPUKAN"))
+        form.addView(Ui.section(this, "LOKASI TUMPUKAN"))
         lokasiSpinner = Spinner(this)
         lokasiSpinner.adapter = ArrayAdapter(
             this, android.R.layout.simple_spinner_item, LOKASI
@@ -201,7 +206,10 @@ class MainActivity : Activity() {
         clearData.addView(Ui.title(this, "HAPUS DATA"))
         clearData.addView(Ui.label(this, "Hapus semua baris yang sudah direkam di sheet dan penyimpanan lokal. Aksi ini tidak terbalik."))
         clearData.addView(Ui.row(this,
-            Ui.button(this, "Hapus Semua", true) { hapusSemua() },
+            Ui.button(this, "Hapus Semua", true) { hapusSemua() }.apply {
+                setTextColor(Ui.DANGER)
+                background = Ui.pressable(Ui.DANGER_LIGHT, 10f, Ui.DANGER)
+            },
             Ui.button(this, "Batal", false) {}
         ))
         root.addView(clearData)
@@ -209,7 +217,7 @@ class MainActivity : Activity() {
         // Daftar data
         val daftar = Ui.card(this)
         daftar.addView(Ui.title(this, "DATA TERSIMPAN"))
-        daftar.addView(Ui.hint(this, "Ketuk baris untuk menghapusnya"))
+        daftar.addView(Ui.hint(this, "Ketuk baris untuk edit • tombol Hapus menghapus data"))
         daftarLayout = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         daftar.addView(daftarLayout)
         root.addView(daftar)
@@ -226,7 +234,7 @@ class MainActivity : Activity() {
     private fun statCard(label: String): Pair<LinearLayout, TextView> {
         val box = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            background = Ui.rounded(0xFFEEF3FA.toInt(), 10f)
+            background = Ui.rounded(Ui.ACCENT_LIGHT, 12f)
             setPadding(dp(this@MainActivity, 10f), dp(this@MainActivity, 10f),
                 dp(this@MainActivity, 10f), dp(this@MainActivity, 10f))
             layoutParams = LinearLayout.LayoutParams(0,
@@ -370,18 +378,7 @@ class MainActivity : Activity() {
             val b = rows.optJSONArray(i) ?: continue
             koli += angka(b.optString(4))
             kuantum += angka(b.optString(5))
-            val tv = TextView(this).apply {
-                text = "${b.optString(0)}. ${b.optString(1)} | ${b.optString(6)}"
-                textSize = 12f
-                setTextColor(Ui.TEXT)
-                setPadding(dp(context, 8f), dp(context, 8f), dp(context, 8f), dp(context, 8f))
-                background = Ui.rounded(0xFFF8FAFD.toInt(), 8f, Ui.LINE)
-                setOnClickListener { konfirmasiHapus(i) }
-                layoutParams = LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
-                ).apply { bottomMargin = dp(context, 6f) }
-            }
-            daftarLayout.addView(tv)
+            daftarLayout.addView(barisView(b, i))
         }
         hasil = if (rows.length() > 0)
             angka(rows.optJSONArray(rows.length() - 1)?.optString(2)) else 0.0
@@ -391,6 +388,140 @@ class MainActivity : Activity() {
         if (daftarLayout.childCount == 0) {
             daftarLayout.addView(Ui.hint(this, "Belum ada data."))
         }
+    }
+
+    private fun barisView(b: JSONArray, index: Int): LinearLayout {
+        val info = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            layoutParams = LinearLayout.LayoutParams(
+                0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f
+            )
+        }
+        info.addView(TextView(this).apply {
+            text = "${b.optString(0)}. ${b.optString(1)} • ${b.optString(6)}"
+            textSize = 13f
+            setTextColor(Ui.TEXT)
+            setTypeface(null, android.graphics.Typeface.BOLD)
+        })
+        info.addView(TextView(this).apply {
+            text = "Koli ${rapih(angka(b.optString(4)))} • Total ${rapih(angka(b.optString(2)))}"
+            textSize = 11f
+            setTextColor(Ui.MUTED)
+            setPadding(0, dp(context, 4f), 0, 0)
+        })
+        return Ui.row(
+            this, info,
+            Ui.chip(this, "Ubah") { editBaris(index) },
+            Ui.chip(this, "Hapus", true) { konfirmasiHapus(index) }
+        ).apply {
+            background = Ui.pressable(Ui.SURFACE, 10f, Ui.LINE)
+            setPadding(dp(context, 10f), dp(context, 8f), dp(context, 10f), dp(context, 8f))
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply { bottomMargin = dp(context, 6f) }
+        }
+    }
+
+    private fun rehitungTotal() {
+        var saldo = 0.0
+        for (i in 0 until rows.length()) {
+            val b = rows.optJSONArray(i) ?: continue
+            val koli = angka(b.optString(4))
+            saldo += koli
+            b.put(2, rapih(saldo))
+            b.put(3, rapih(saldo * 10))
+            b.put(5, rapih(koli * 10))
+        }
+    }
+
+    private fun editBaris(index: Int) {
+        val lama = rows.optJSONArray(index) ?: return
+        var tgl = lama.optString(1)
+
+        val box = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(this@MainActivity, 20f), dp(this@MainActivity, 16f),
+                dp(this@MainActivity, 20f), dp(this@MainActivity, 8f))
+        }
+        box.addView(Ui.section(this, "TANGGAL"))
+        val tglBtn = Button(this).apply {
+            text = tgl
+            isAllCaps = false
+            textSize = 14f
+            setTextColor(Ui.ACCENT_DARK)
+            background = Ui.pressable(Ui.ACCENT_LIGHT, 10f, Ui.ACCENT)
+            minimumHeight = dp(this@MainActivity, 48f)
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+            setOnClickListener {
+                val cal = Calendar.getInstance()
+                try {
+                    val p = tgl.split("-").map { it.toInt() }
+                    cal.set(p[2], p[1] - 1, p[0])
+                } catch (_: Exception) {}
+                DatePickerDialog(
+                    this@MainActivity, { _, y, m, d ->
+                        tgl = "%02d-%02d-%04d".format(d, m + 1, y)
+                        text = tgl
+                    },
+                    cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH)
+                ).show()
+            }
+        }
+        box.addView(tglBtn)
+
+        box.addView(Ui.section(this, "JUMLAH KOLI PER HARI"))
+        val koliEditDialog = Ui.input(this).apply {
+            inputType = InputType.TYPE_CLASS_NUMBER
+            setText(rapih(angka(lama.optString(4))))
+            hint = "0"
+        }
+        box.addView(koliEditDialog)
+
+        box.addView(Ui.section(this, "LOKASI TUMPUKAN"))
+        val lokasiDialog = Spinner(this)
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, LOKASI)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        lokasiDialog.adapter = adapter
+        val pos = LOKASI.indexOf(lama.optString(6))
+        if (pos >= 0) lokasiDialog.setSelection(pos)
+        box.addView(lokasiDialog)
+        box.addView(Ui.hint(this, "Total dan kuantum dihitung ulang otomatis."))
+
+        AlertDialog.Builder(this)
+            .setTitle("Edit data")
+            .setView(box)
+            .setPositiveButton("Simpan") { _, _ ->
+                val teks = koliEditDialog.text.toString().trim()
+                if (teks.isEmpty()) {
+                    statusText.text = "Isi jumlah koli dulu."
+                    return@setPositiveButton
+                }
+                val koli = angka(teks)
+                val baru = JSONArray()
+                    .put(lama.optString(0))
+                    .put(tgl)
+                    .put("0").put("0")
+                    .put(rapih(koli)).put(rapih(koli * 10))
+                    .put(lokasiDialog.selectedItem.toString())
+                rows.put(index, baru)
+                rehitungTotal()
+                prefs.edit().putString("rows", rows.toString()).apply()
+                refresh()
+                hitung()
+                statusText.text = "Baris diubah. Menyinkron ke sheet..."
+                post("edit", JSONArray(),
+                    JSONObject().put("lama", lama).put("baru", baru)
+                ) { resp ->
+                    statusText.text = if (resp.optBoolean("ok"))
+                        "Perubahan terkirim ke sheet."
+                    else
+                        "Perubahan tersimpan lokal. Sheet: ${resp.optString("error")}"
+                }
+            }
+            .setNegativeButton("Batal", null)
+            .show()
     }
 
     private fun konfirmasiHapus(index: Int) {
@@ -415,7 +546,10 @@ class MainActivity : Activity() {
             .show()
     }
 
-    private fun post(action: String, data: JSONArray, cb: (JSONObject) -> Unit) {
+    private fun post(
+        action: String, data: JSONArray,
+        extra: JSONObject? = null, cb: (JSONObject) -> Unit
+    ) {
         val url = prefs.getString("url", "")?.trim().orEmpty()
             .ifBlank { "https://script.google.com/macros/s/AKfycbxjOFDff84XTZWwwjoLyYuA-2aqQruuxdf8AdlVd4OhMgCYRlIrBGKsvzigCQ2k44lk/exec" }
         if (!url.startsWith("https://")) {
@@ -430,6 +564,9 @@ class MainActivity : Activity() {
                     put("sheet", "REBAG HARIAN")
                     put("action", action)
                     put("rows", data)
+                    extra?.let { e ->
+                        e.keys().forEach { k -> put(k, e.get(k)) }
+                    }
                 }.toString()
                 val conn = URL(url).openConnection() as HttpURLConnection
                 conn.requestMethod = "POST"
